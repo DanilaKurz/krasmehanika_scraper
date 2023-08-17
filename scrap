@@ -1,0 +1,10 @@
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+
+url = 'https://krasmehanika.ru/catalog/'
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'lxml')
+
+main_links = soup.find_all('a').get('href')
+print(main_links)
