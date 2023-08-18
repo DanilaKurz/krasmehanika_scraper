@@ -1,27 +1,27 @@
-import pandas as pd
-import requests
-from bs4 import BeautifulSoup
-import json
+def parse_product_link(soupec):
+    global all_products_list
+    all_products_links = soupec.find_all(
+        class_='item_block col-4 col-md-3 col-sm-6 col-xs-6')
+    for item in all_products_links:
+        all_products_list.append(item.find('a').get('href'))
+# print(categories_dict)
 
-url = 'https://krasmehanika.ru/catalog/'
-response = requests.get(url)
-soup = BeautifulSoup(response.text, 'lxml')
+def parse_product_
 
-main_links = soup.find_all('li', class_='name')
-
-categories_dict = {}
-for item in main_links:
-    item_text = item.text.replace('\n', '')
-    item_href = 'https://krasmehanika.ru' + item.find('a').get('href')
-    print(f'{item_text}: {item_href}')
-
-    categories_dict[item_text] = item_href
-
-
-# with open('names_and_links.json', 'w') as file_links:
-#     json.dump(categories_dict, file_links, indent=4, ensure_ascii=False)
-
-# with open('names_and_links.json') as file_links:
-#     all_categories = json.load(file_links)
-#
-# print(all_categories)
+for k, v in categories_dict.items():
+    new_response = requests.get(v)
+    new_soup = BeautifulSoup(new_response.text, 'lxml')
+    parse_product_link(new_soup)
+    try:
+        last_link = new_soup.find_all('a', class_='dark_link')[-1].text
+        try:
+            link_int = int(last_link)
+            for i in range(2, link_int + 1):
+                new_response = requests.get(v + f'?PAGEN_2={i}')
+                new_soup = BeautifulSoup(new_response.text, 'lxml')
+                parse_product_link(new_soup)
+            print(all_products_list)
+        except:
+            pass
+    except AttributeError:
+        pass
