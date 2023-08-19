@@ -1,12 +1,49 @@
-def parse_product_link(soupec):
-    global all_products_list
-    all_products_links = soupec.find_all(
-        class_='item_block col-4 col-md-3 col-sm-6 col-xs-6')
-    for item in all_products_links:
-        all_products_list.append(item.find('a').get('href'))
+mport pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import json
+
+products_df = pd.DataFrame(columns=['Name', 'Description'])
+
+url = 'https://krasmehanika.ru/catalog/'
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'lxml')
+
+# main_links = soup.find_all('a')
+# print(main_links)
+main_links = soup.find_all('li', class_='name')
+
+categories_dict = {}
+for item in main_links:
+    item_text = item.text.replace('\n', '')
+    item_href = 'https://krasmehanika.ru' + item.find('a').get('href')
+    categories_dict[item_text] = item_href
 # print(categories_dict)
 
-def parse_product_
+all_products_list = []
+
+def parse_product_link(soupec):
+    global all_products_list
+    all_products_links = soupec.find_all(class_='item_block col-4 col-md-3 col-sm-6 col-xs-6')
+    for item in all_products_links:
+        product_response = requests.get(f"https://krasmehanika.ru{item.find('a').get('href')}")
+        product_soup = BeautifulSoup(product_response.text, 'lxml')
+        global products_df
+        product_name = product_soup.find('h1', id='pagetitle').text
+        product_description = product_soup.find('div', class_='detail_text').get_text(separator=' ', strip=True)
+        # products_df = products_df.append({'Name': product_name, 'Description': product_description}, ignore_index=True)
+        products_df.loc[len(products_df)] = [product_name, product_description]
+        break
+        # print(product_description)
+        # all_products_list.append(item.find('a').get('href'))
+# print(categories_dict)
+
+# def parse_product(new_soupec):
+#     global products_df
+#     product_name = new_soupec.find('h1', id='pagetitle').text
+#     product_description = new_soupec.find('div', class_='detail_text').text
+#     print(product_description)
+    # product_characteristics = new_soupec.find('table', class_='detail_text')
 
 for k, v in categories_dict.items():
     new_response = requests.get(v)
@@ -14,14 +51,20 @@ for k, v in categories_dict.items():
     parse_product_link(new_soup)
     try:
         last_link = new_soup.find_all('a', class_='dark_link')[-1].text
+        # print(last_link)
         try:
             link_int = int(last_link)
             for i in range(2, link_int + 1):
                 new_response = requests.get(v + f'?PAGEN_2={i}')
                 new_soup = BeautifulSoup(new_response.text, 'lxml')
                 parse_product_link(new_soup)
-            print(all_products_list)
         except:
             pass
     except AttributeError:
         pass
+
+
+products_df.to_excel('products.xlsx', index=False)
+
+
+# print(all_products_list)
