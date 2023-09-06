@@ -10,7 +10,7 @@ a = ['https://krasmehanika.ru/catalog/apparaty_bezvozdushnoy_pokraski/porshnevye
 # endregion
 
 products_df = pd.DataFrame(
-    columns=['link', 'cat', 'sub', 'product_name', 'Description', 'Characteristics', 'Price', 'Quantity', 'Article', 'KP link',
+    columns=['Ссылка', 'Категория', 'Подкатегория', 'Название', 'Описание', 'Характеристики', 'Цена', 'Количество', 'Артикуль', 'KP link',
              'Youtube_link', 'Actuality'])
 
 base_url = 'https://krasmehanika.ru/catalog'
@@ -267,11 +267,11 @@ for item in a[:30]:
     product_characteristics = extract_characteristics(product_soup)
 
     # Check if the product exists in the existing_products_df
-    existing_product = existing_products_df[existing_products_df['product_name'] == product_name].iloc[
-        0] if product_name in existing_products_df['product_name'].values else None
+    existing_product = existing_products_df[existing_products_df['Название'] == product_name].iloc[
+        0] if product_name in existing_products_df['Название'].values else None
 
-    if existing_product is not None and existing_product['product_price'] > 0:
-        product_price = existing_product['product_price']
+    if existing_product is not None and existing_product['Цена'] > 0:
+        product_price = existing_product['Цена']
     else:
         product_price = extract_price(product_soup)
 
@@ -282,7 +282,7 @@ for item in a[:30]:
     category, subcategory = extract_category_and_subcategory(item, product_soup)
 
     if existing_product is not None:
-        actuality = existing_product['actuality']
+        actuality = existing_product['Actuality']
     else:
         actuality = ''  # or set it based on your new parsing
 
