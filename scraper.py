@@ -131,7 +131,7 @@ def extract_price(soupcheg):
         currency = currency_element.get_text(strip=True) if currency_element else ""
         measure = measure_element.get_text(strip=True) if measure_element else ""
 
-        price_string = f"{price_value} {currency} {measure}".strip()
+        price_string = f"{price_value}".strip()
     else:
         price_string = 'No info'
 
@@ -196,109 +196,31 @@ def extract_download_link(vkusno):
     return 'No info'
 
 
-# def extract_category(soup):
-#     # Initialize the results
-#     category_text = 'No info'
-#     subcategory_text = 'No info'
-#
-#     # First, find the left_block div
-#     left_block = soup.find('div', class_='left_block')
-#     left_menu = left_block.find('ul', class_="left_menu")
-#
-#     if left_menu:
-#         # Find the current subcategory first
-#         current_subcategory = left_menu.select_one('li.menu_item.current')
-#         if current_subcategory:
-#             subcategory_link = current_subcategory.find('a')
-#             subcategory_text = subcategory_link.get_text(strip=True) if subcategory_link else 'No info'
-#
-#             # Traverse up to its parent <li> to get the category
-#             category_with_sub = current_subcategory.find_parent('li', class_='has-childs item')
-#             if category_with_sub:
-#                 category_link = category_with_sub.find('a', class_='icons_fa')
-#                 category_text = category_link.get_text(strip=True) if category_link else 'No info'
-#         else:
-#             # If no subcategory is found, try to find the current category without subcategories within the left_block
-#             category_without_sub = left_menu.select_one('li.current.item')
-#             if category_without_sub:
-#                 category_link = category_without_sub.find('a', class_='icons_fa')
-#                 category_text = category_link.get_text(strip=True) if category_link else 'No info'
-#
-#     return category_text, subcategory_text
-
-
 def extract_category_and_subcategory(link, sopec):
     # Parse the URL
     parsed_url = urlparse(link)
     segments = parsed_url.path.strip('/').split('/')
 
-    # If there are 4 segments, extract from the third and second segments' pages
-    if len(segments) == 5:
-        # Construct the subcategory URL
-        subcategory_url = urljoin(link, f"/{segments[0]}/{segments[1]}/{segments[2]}/{segments[3]}/")
-        # print(subcategory_url)
-        # Get the content of the subcategory page
-        subcategory_response = requests.get(subcategory_url)
-        subcategory_soup = BeautifulSoup(subcategory_response.text, 'lxml')
-        subcategory_text = subcategory_soup.find('h1', id='pagetitle').get_text(strip=True)
+    # Initialize default values
+    category_text = 'No info'
+    subcategory_text = 'No info'
 
-        # Construct the category URL
+    # Check the number of segments to determine the type of URL
+    if len(segments) in [3, 4, 5, 6]:
+        # Construct the category URL and extract its name
         category_url = urljoin(link, f"/{segments[0]}/{segments[1]}/")
-        # Get the content of the category page
         category_response = requests.get(category_url)
         category_soup = BeautifulSoup(category_response.text, 'lxml')
         category_text = category_soup.find('h1', id='pagetitle').get_text(strip=True)
 
-        return category_text, subcategory_text
+        # If there are more than 3 segments, construct the subcategory URL and extract its name
+        if len(segments) > 3:
+            subcategory_url = urljoin(link, f"/{segments[0]}/{segments[1]}/{segments[2]}/")
+            subcategory_response = requests.get(subcategory_url)
+            subcategory_soup = BeautifulSoup(subcategory_response.text, 'lxml')
+            subcategory_text = subcategory_soup.find('h1', id='pagetitle').get_text(strip=True)
 
-    elif len(segments) == 6:
-        subcategory_url = urljoin(link, f"/{segments[0]}/{segments[1]}/{segments[2]}/{segments[3]}/")
-        # print(subcategory_url)
-        # Get the content of the subcategory page
-        subcategory_response = requests.get(subcategory_url)
-        subcategory_soup = BeautifulSoup(subcategory_response.text, 'lxml')
-        subcategory_text = subcategory_soup.find('h1', id='pagetitle').get_text(strip=True)
-
-        # Construct the category URL
-        category_url = urljoin(link, f"/{segments[0]}/{segments[1]}/")
-        # Get the content of the category page
-        category_response = requests.get(category_url)
-        category_soup = BeautifulSoup(category_response.text, 'lxml')
-        category_text = category_soup.find('h1', id='pagetitle').get_text(strip=True)
-
-        return category_text, subcategory_text
-
-    # If there are 3 segments, use the provided function
-    elif len(segments) == 4:
-        subcategory_url = urljoin(link, f"/{segments[0]}/{segments[1]}/{segments[2]}/")
-        # print(subcategory_url)
-        # Get the content of the subcategory page
-        subcategory_response = requests.get(subcategory_url)
-        subcategory_soup = BeautifulSoup(subcategory_response.text, 'lxml')
-        subcategory_text = subcategory_soup.find('h1', id='pagetitle').get_text(strip=True)
-
-        # Construct the category URL
-        category_url = urljoin(link, f"/{segments[0]}/{segments[1]}/")
-        # Get the content of the category page
-        category_response = requests.get(category_url)
-        category_soup = BeautifulSoup(category_response.text, 'lxml')
-        category_text = category_soup.find('h1', id='pagetitle').get_text(strip=True)
-
-        return category_text, subcategory_text
-
-    elif len(segments) == 3:
-        subcategory_text = "No info"
-        category_url = urljoin(link, f"/{segments[0]}/{segments[1]}/")
-        # Get the content of the category page
-        category_response = requests.get(category_url)
-        category_soup = BeautifulSoup(category_response.text, 'lxml')
-        category_text = category_soup.find('h1', id='pagetitle').get_text(strip=True)
-
-        return category_text, subcategory_text
-
-    # Return 'No info' for other cases
-    else:
-        return 'No info', 'No info'
+    return category_text, subcategory_text
 
 # extract_category(product_soup)
 
