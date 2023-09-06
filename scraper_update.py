@@ -268,4 +268,4 @@ for item in links:
 	print(counter)
 
 
-products_df.to_excel('products.xlsx', index=False)
+products_df.to_excel('new_products.xlsx', index=False)
