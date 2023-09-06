@@ -10,8 +10,8 @@ a = ['https://krasmehanika.ru/catalog/apparaty_bezvozdushnoy_pokraski/porshnevye
 # endregion
 
 products_df = pd.DataFrame(
-    columns=['link', 'cat', 'sub', 'Name', 'Description', 'Characteristics', 'Price', 'Quantity', 'Article', 'KP link',
-             'Youtube_link', 'Actuality'])
+    columns=[['Ссылка', 'Категория', 'Подкатегория', 'Название', 'Описание', 'Характеристики', 'Цена', 'Количество', 'Артикуль', 'KP link',
+             'Youtube_link', 'Actuality'])])
 
 base_url = 'https://krasmehanika.ru/catalog'
 
