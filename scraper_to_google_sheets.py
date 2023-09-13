@@ -6,13 +6,17 @@ from bs4 import BeautifulSoup
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import time
+import httplib2
+import apiclient.discovery
+
 
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/spreadsheets',
          'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('krasmehaika-scrapper-f5521af74c3f.json', scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name('krasmehaika-scrapper-074958bc7c2c.json', scope)
 client = gspread.authorize(creds)
+spreadsheet_id = '1q8QRvSQL7TsBuK5MzBa1yW2gAZiFwxAH5vthbWa7Yzg'
 
-sheet = client.open("Your Google Sheet Name").sheet1
+sheet = client.open("product").sheet1
 
 products_df = pd.DataFrame(
     columns=['Ссылка', 'Категория', 'Подкатегория', 'Название', 'Описание', 'Характеристики', 'Цена', 'Измерение',
